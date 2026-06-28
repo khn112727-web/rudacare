@@ -12,9 +12,10 @@ exports.handler = async function(event) {
   const url = `https://apis.data.go.kr/1471000/FoodNtrCpntDbInfo02/getFoodNtrCpntDbInq02?serviceKey=${KEY}&type=json&pageNo=1&numOfRows=10&FOOD_NM_KR=${encodeURIComponent(q)}`;
   try {
     const res = await fetch(url);
-    const data = await res.json();
-    const items = data?.response?.body?.items || [];
-    return { statusCode: 200, headers, body: JSON.stringify({ list: items }) };
+    const text = await res.text();
+    const data = JSON.parse(text);
+    const items = data?.response?.body?.items || data?.body?.items || data?.items || [];
+    return { statusCode: 200, headers, body: JSON.stringify({ list: items, debug: text.slice(0,200) }) };
   } catch(e) {
     return { statusCode: 500, headers, body: JSON.stringify({ error: e.message }) };
   }
