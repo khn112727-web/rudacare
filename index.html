@@ -1251,6 +1251,13 @@ function chkLab(el, key, type) {
 }
 
 /* ── 식단 검색 ── */
+let _foodDB = null;
+async function loadFoodDB() {
+  if (_foodDB) return _foodDB;
+  const res = await fetch('food_db.json');
+  _foodDB = await res.json();
+  return _foodDB;
+}
 async function searchFood() {
   const type = currentType;
   const q = document.getElementById('food-q').value.trim();
@@ -1259,24 +1266,23 @@ async function searchFood() {
   resEl.style.display = 'block';
   resEl.innerHTML = '<div class="fri">🔍 검색 중...</div>';
   try {
-    const url = `/.netlify/functions/food?q=${encodeURIComponent(q)}`;
-    const json = await fetch(url).then(r=>r.json());
-    const items = json.list || [];
+    const db = await loadFoodDB();
+    const items = db.filter(f => f.name.includes(q));
     if (!items.length) { resEl.innerHTML='<div class="fri">검색 결과 없음</div>'; return; }
     resEl.innerHTML = '';
     items.slice(0,10).forEach(item => {
-      const name = item.FOOD_NM_KR||'알 수 없음';
-      const k  = Math.round(parseFloat(item.AMT_NUM13||0));
-      const p  = Math.round(parseFloat(item.AMT_NUM12||0));
-      const na = Math.round(parseFloat(item.AMT_NUM11||0));
-      const cal= Math.round(parseFloat(item.AMT_NUM1||0));
+      const name = item.name;
+      const k  = Math.round(item.k);
+      const p  = Math.round(item.p);
+      const na = Math.round(item.na);
+      const cal= Math.round(item.kcal);
       const d  = document.createElement('div'); d.className='fri';
       d.innerHTML = `<div class="fri-name">${name}</div><div class="fri-info">K:${k}mg &middot; P:${p}mg &middot; Na:${na}mg &middot; ${cal}kcal</div>`;
       d.onclick = ()=>addFood(type,{name,k,p,na,cal});
       resEl.appendChild(d);
     });
   } catch(e) {
-    resEl.innerHTML = `<div class="fri" style="color:#ef4444">⚠️ API 오류 (CORS/네트워크)<br><small style="color:#94a3b8">${e.message}</small></div>`;
+    resEl.innerHTML = `<div class="fri" style="color:#ef4444">⚠️ 데이터 로드 오류<br><small style="color:#94a3b8">${e.message}</small></div>`;
   }
 }
 function addFood(type, food) {
