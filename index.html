@@ -560,7 +560,7 @@ body{font-family:'Malgun Gothic','맑은 고딕',sans-serif;font-size:19px;color
         <div class="settings-banner-ico">›</div>
       </div>
 
-      <div class="disclaimer">※ 본 앱은 건강기록 및 자기관리를 지원하기 위한 도구이며, 의료진의 진단 및 치료를 대체하지 않습니다.</div>
+      <div class="disclaimer">※ 본 앱은 건강기록 및 자기관리를 지원하기 위한 도구이며, 의료진의 진단 및 치료를 대체하지 않습니다.<br>※ 영양정보 출처: 식품영양성분 데이터베이스(Korean Food Composition Database, K-FCDB), 식품의약품안전처</div>
     </div><!-- /tab-home -->
 
     <!-- ── VITALS ── -->
@@ -1263,18 +1263,35 @@ async function searchFood() {
     resEl.innerHTML = '';
     items.slice(0,10).forEach(item => {
       const name = item.name;
+      const unitLbl = item.unit === 'ml' ? '100mL당' : '100g당';
       const k  = Math.round(item.k);
       const p  = Math.round(item.p);
       const na = Math.round(item.na);
       const cal= Math.round(item.kcal);
       const d  = document.createElement('div'); d.className='fri';
-      d.innerHTML = `<div class="fri-name">${name}</div><div class="fri-info">K:${k}mg &middot; P:${p}mg &middot; Na:${na}mg &middot; ${cal}kcal</div>`;
-      d.onclick = ()=>addFood(type,{name,k,p,na,cal});
+      d.innerHTML = `<div class="fri-name">${name}</div><div class="fri-info">${unitLbl} &middot; K:${k}mg &middot; P:${p}mg &middot; Na:${na}mg &middot; ${cal}kcal</div>`;
+      d.onclick = ()=>askAmountAndAdd(type,item);
       resEl.appendChild(d);
     });
   } catch(e) {
     resEl.innerHTML = `<div class="fri" style="color:#ef4444">⚠️ 데이터 로드 오류<br><small style="color:#94a3b8">${e.message}</small></div>`;
   }
+}
+function askAmountAndAdd(type, item) {
+  const unitLbl = item.unit === 'ml' ? 'mL' : 'g';
+  const input = prompt(`${item.name}\n섭취량을 입력해주세요 (${unitLbl})`, '100');
+  if (input === null) return;
+  const amount = parseFloat(input);
+  if (!amount || amount <= 0) { showToast('⚠️ 올바른 숫자를 입력해주세요'); return; }
+  const ratio = amount / 100;
+  const food = {
+    name: `${item.name} (${amount}${unitLbl})`,
+    k:  +(item.k  * ratio).toFixed(1),
+    p:  +(item.p  * ratio).toFixed(1),
+    na: +(item.na * ratio).toFixed(1),
+    cal:+(item.kcal*ratio).toFixed(1)
+  };
+  addFood(type, food);
 }
 const MEAL_PRAISE = {아침:'🌅 아침 식사 기록 완료! 좋은 시작이에요',점심:'☀️ 점심 식사 기록 완료! 잘하고 계세요',저녁:'🌙 저녁 식사 기록 완료! 오늘도 수고하셨어요',간식:'🍪 간식도 잊지 않고 기록하셨네요!'};
 function addFood(type, food) {
