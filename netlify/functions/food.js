@@ -13,8 +13,8 @@ exports.handler = async function(event) {
   const q = event.queryStringParameters && event.queryStringParameters.q;
   if (!q) return { statusCode: 400, headers, body: JSON.stringify({ error: 'no query' }) };
 
-  const KEY = '2006f0f8b3c56d599e79b9176a0f395521dfcfac22217f14c054d30cf07b410a';
-  const url = `https://apis.data.go.kr/1471000/FoodNtrCpntDbInfo02/getFoodNtrCpntDbInq02?serviceKey=${KEY}&type=json&pageNo=1&numOfRows=10`;
+  const KEY = '72ac93023e1e2d4532f66c37c29233c6251e68e31b1c94deca7cdc7ec078c218';
+  const url = `https://apis.data.go.kr/1471000/FoodNtrCpntDbInfo02/getFoodNtrCpntDbInq02?serviceKey=${KEY}&type=json&pageNo=1&numOfRows=10&FOOD_NM_KR=${encodeURIComponent(q)}`;
 
   try {
     const res = await fetch(url);
