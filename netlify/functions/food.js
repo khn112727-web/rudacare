@@ -14,7 +14,7 @@ exports.handler = async function(event) {
   if (!q) return { statusCode: 400, headers, body: JSON.stringify({ error: 'no query' }) };
 
   const KEY = '2006f0f8b3c56d599e79b9176a0f395521dfcfac22217f14c054d30cf07b410a';
-  const url = `https://apis.data.go.kr/1471000/FoodNtrCpntDbInfo02/getFoodNtrCpntDbInq02?serviceKey=${KEY}&type=json&pageNo=1&numOfRows=10&FOOD_NM_KR=${encodeURIComponent(q)}`;
+  const url = `https://apis.data.go.kr/1471000/FoodNtrCpntDbInfo02/getFoodNtrCpntDbInq02?serviceKey=${KEY}&type=json&pageNo=1&numOfRows=10`;
 
   try {
     const res = await fetch(url);
